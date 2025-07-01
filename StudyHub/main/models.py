@@ -66,7 +66,7 @@ class Course(models.Model):
     description = models.TextField(blank=False, null=False)
     level = models.CharField(max_length=20, choices=LEVEL_CHOICES, blank=False, null=False)
     cover = models.ImageField(
-        upload_to='covers/',
+        upload_to='main/covers/',
         blank=False,
         null=False,
         validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])],
@@ -88,7 +88,7 @@ class Lesson(models.Model):
     course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='lessons')
     lesson_name = models.TextField(blank=False, null=False)
     description = models.TextField(blank=False, null=False)
-    video = models.FileField(upload_to=f'video/')
+    video = models.FileField(upload_to='main/video/')
 
     class Meta:
         db_table = 'lessons'
