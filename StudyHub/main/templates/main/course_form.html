@@ -1,0 +1,44 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'main/styles/course_form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center">
+    <div class="form-wrapper">
+        <h2 class="mb-4 text-center">Create course</h2>
+        <form method="post" enctype="multipart/form-data" id="courseForm">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.course_name.label_tag }}
+                {{ form.course_name }}
+            </div>
+            <div class="mb-3">
+                {{ form.description.label_tag }}
+                {{ form.description }}
+            </div>
+            <div class="mb-3">
+                {{ form.level.label_tag }}
+                {{ form.level }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_cover" class="form-label">Cover</label>
+                <div id="drop-zone" class="drop-zone">
+                    <span>Drag and drop cover here</span>
+                    {{ form.cover }}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Save</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/scripts.js' %}"></script>
+{% endblock %}
+

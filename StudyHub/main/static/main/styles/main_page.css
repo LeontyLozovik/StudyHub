@@ -1,0 +1,32 @@
+.course-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease-in-out;
+    background-color: #fff;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.course-cover {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    object-fit: cover;
+    height: 180px;
+    width: 100%;
+}
+
+.level-badge {
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 0.25em 0.5em;
+    border-radius: 8px;
+    opacity: 0.9;
+}
+
+.author-date {
+    font-size: 0.75rem;
+    font-style: italic;
+}
