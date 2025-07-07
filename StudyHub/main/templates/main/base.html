@@ -16,10 +16,14 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark mb-4">
         <div class="container">
-            <a class="navbar-brand" href="/">Courses</a>
+            <a class="navbar-brand" href="{% url 'main_page' %}">Courses</a>
+            <a class="navbar-brand" href="{% url 'create_course' %}">Create</a>
+            <a class="navbar-brand" href="{% url 'login' %}">Login</a>
+            <a class="navbar-brand" href="{% url 'signup' %}">Sign up</a>
+            <a class="navbar-brand" href="{% url 'logout' %}">Log out</a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
-                    <!-- Навигационные ссылки -->
+
                 </ul>
             </div>
         </div>

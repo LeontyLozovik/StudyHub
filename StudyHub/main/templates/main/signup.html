@@ -1,0 +1,46 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'main/styles/signup.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-4 text-center">Signing up</h2>
+            <form method="post" enctype="multipart/form-data" novalidate id="registrationForm">
+                {% csrf_token %}
+
+                <!-- Остальные поля -->
+                {% for field in form %}
+                    {% if field.name != "avatar" %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <div class="mb-3">
+                    <label for="id_avatar" class="form-label">Avatar</label>
+                    <div id="drop-zone" class="drop-zone">
+                        <p id="drop-zone-text">Drag and drop here</p>
+                        {{ form.avatar }}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Sign up</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'main/js/signup.js' %}"></script>
+{% endblock %}
