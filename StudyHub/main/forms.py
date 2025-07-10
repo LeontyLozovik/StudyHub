@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.forms import ModelForm, ClearableFileInput, TextInput, Select
+from django.forms import ModelForm, ClearableFileInput, TextInput, Select, Textarea
 
-from .models import Course, UserProfile
+from .models import Course, UserProfile, Lesson
 
 
 class LoginForm(AuthenticationForm):
@@ -77,7 +77,6 @@ class SignupForm(UserCreationForm):
         self.fields['password2'].label = 'Confirm Password'
         self.fields['bio'].label = 'Biography'
 
-
 class CreateCourseForm(ModelForm):
     class Meta:
         model = Course
@@ -85,9 +84,24 @@ class CreateCourseForm(ModelForm):
         widgets = {
             'cover': ClearableFileInput(attrs={
                 'class': 'form-control-file',
-                'id': 'id_cover'
+                'id': 'id_cover',
             }),
             'course_name': TextInput(attrs={'class': 'form-control'}),
             'description': TextInput(attrs={'class': 'form-control'}),
             'level': Select(attrs={'class': 'form-select'})
+        }
+
+class CreateLessonForm(ModelForm):
+    class Meta:
+        model = Lesson
+        fields = ['lesson_name', 'description', 'video']
+        widgets = {
+            'lesson_name': TextInput(attrs={'class': 'form-control'}),
+            'description': Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'video': ClearableFileInput(attrs={
+                'class': 'form-control-file',
+                'id': 'id_video',
+                'style': 'display: none;',
+                'accept': 'video/*'
+            }),
         }

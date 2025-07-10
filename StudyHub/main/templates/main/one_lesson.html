@@ -1,0 +1,36 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'main/styles/one_lesson.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="lesson-container mx-auto mt-4">
+    <h2 class="lesson-title text-center mb-4">{{ lesson.lesson_name }}</h2>
+
+    <div class="video-wrapper mb-4">
+        {% if lesson.video %}
+            <video controls class="w-100 rounded shadow-sm">
+                <source src="{{ lesson.video.url }}" type="video/mp4">
+                Ваш браузер не поддерживает воспроизведение видео.
+            </video>
+        {% else %}
+            <div class="alert alert-warning text-center">
+                Видео отсутствует
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="lesson-description">
+        <h5>Описание:</h5>
+        <p>{{ lesson.description }}</p>
+    </div>
+
+    <div class="back-link mt-4">
+        <a href="{% url 'course_detail' lesson.course.id %}" class="btn btn-outline-primary">
+            ← Назад к курсу "{{ lesson.course.course_name }}"
+        </a>
+    </div>
+</div>
+{% endblock %}

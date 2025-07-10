@@ -51,7 +51,7 @@ class UserProfile(AbstractUser):
         validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])],
         help_text='Download your avatar'
     ),
-    bio = models.TextField(blank=True, null=True),
+    bio = models.TextField(blank=True, null=True)
     country = CountryField(blank_label='Choose your country', default='BY')
 
     class Meta:
@@ -85,6 +85,7 @@ class Course(models.Model):
 
 
 class Lesson(models.Model):
+    author = models.ForeignKey(to=UserProfile, on_delete=models.SET_NULL, null=True, related_name='my_lessons')
     course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='lessons')
     lesson_name = models.TextField(blank=False, null=False)
     description = models.TextField(blank=False, null=False)

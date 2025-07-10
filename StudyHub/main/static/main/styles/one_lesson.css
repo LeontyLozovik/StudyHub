@@ -1,0 +1,25 @@
+.lesson-container {
+    max-width: 800px;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 3rem;
+}
+
+.lesson-title {
+    font-weight: 600;
+    font-size: 1.75rem;
+    color: #343a40;
+}
+
+.video-wrapper video {
+    max-height: 450px;
+    object-fit: contain;
+}
+
+.lesson-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #495057;
+}
