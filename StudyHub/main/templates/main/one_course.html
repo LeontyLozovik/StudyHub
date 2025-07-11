@@ -8,9 +8,18 @@
 {% block content %}
 <div class="container mt-4">
     <div class="text-center mb-5">
-        <h1>{{ course.course_name }}</h1>
-        <span class="badge bg-secondary">{{ course.level }}</span>
-    </div>
+    <h1>{{ course.course_name }}</h1>
+
+    <span class="badge
+        {% if course.level == 'starter_level' %}bg-primary
+        {% elif course.level == 'middle_level' %}bg-warning text-dark
+        {% elif course.level == 'advanced_level' %}bg-danger
+        {% else %}bg-secondary
+        {% endif %}
+    ">
+        {{ course.get_level_display }}
+    </span>
+</div>
 
     <div class="mb-4">
         <h4>Описание курса</h4>

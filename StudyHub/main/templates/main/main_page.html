@@ -14,13 +14,17 @@
         <div class="card course-card h-100 position-relative">
             <img src="{{ course.cover.url }}" class="card-img-top course-cover" alt="{{ course.course_name }}">
 
-            <div class="level-badge badge bg-primary position-absolute top-0 end-0 m-2 text-white">
-                {{ course.level }}
+            <div class="level-badge badge position-absolute top-0 end-0 m-2 text-white
+                 {% if course.level == 'starter_level' %}bg-primary
+                 {% elif course.level == 'middle_level' %}bg-warning text-dark
+                 {% elif course.level == 'advanced_level' %}bg-danger
+                 {% endif %}">
+                {{ course.get_level_display }}
             </div>
 
             <div class="card-body d-flex flex-column">
                 <small class="text-muted author-date mb-2">
-                    {{ course.author.get_full_name }} &bull; {{ course.published_date|date:"d M Y" }}
+                    {{ course.author.username }} &bull; {{ course.date_of_publication|date:"d M Y" }}
                 </small>
                 <h5 class="card-title mt-auto">{{ course.course_name }}</h5>
             </div>

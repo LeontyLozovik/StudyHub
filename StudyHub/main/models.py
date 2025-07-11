@@ -45,12 +45,12 @@ NOTIFICATION_TYPE = [
 
 class UserProfile(AbstractUser):
     avatar = models.ImageField(
-        upload_to='avatars/',
+        upload_to='main/avatars/',
         blank=True,
         null=True,
         validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])],
         help_text='Download your avatar'
-    ),
+    )
     bio = models.TextField(blank=True, null=True)
     country = CountryField(blank_label='Choose your country', default='BY')
 
