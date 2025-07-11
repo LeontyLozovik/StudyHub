@@ -1,0 +1,71 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'main/styles/update_course.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Edit Course</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.course_name.label_tag }}
+            {{ form.course_name }}
+        </div>
+        <div class="mb-3">
+            {{ form.level.label_tag }}
+            {{ form.level }}
+        </div>
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.cover.id_for_label }}" class="form-label">Cover:</label>
+            {% if course.cover %}
+                <div class="mb-3">
+                    <img src="{{ course.cover.url }}" alt="Current cover" style="max-height: 200px;" class="img-thumbnail">
+                </div>
+            {% endif %}
+            <div class="custom-file">
+                {{ form.cover }}
+            </div>
+        </div>
+
+
+        <button type="submit" class="btn btn-success">Save</button>
+    </form>
+
+    <hr>
+
+    <h4>Lessons</h4>
+    <div class="lesson-carousel d-flex overflow-auto gap-3">
+        {% for lesson in course.lessons.all %}
+        <div class="lesson-card card flex-shrink-0 position-relative" style="width: 250px;">
+            <!-- Кнопка удаления -->
+            <a href="{% url 'delete_lesson' lesson.pk %}"
+               class="delete-lesson-btn"
+               title="Delete lesson"
+               onclick="return confirm('Are you sure you want to delete this lesson?');">
+                &times;
+            </a>
+
+            <div class="card-img-top video-thumbnail">
+                <video src="{{ lesson.video.url }}" muted preload="metadata" style="width:100%; height:150px; object-fit:cover;" controls></video>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title text-center">{{ lesson.lesson_name }}</h6>
+            </div>
+        </div>
+        {% empty %}
+        <p>No lessons</p>
+        {% endfor %}
+    </div>
+
+    <!-- Квадратная кнопка с прозрачным плюсом для добавления урока -->
+    <a href="{% url 'main_page' %}" class="add-lesson-btn" title="Add lesson"></a>
+</div>
+{% endblock %}

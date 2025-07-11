@@ -4,7 +4,7 @@ from django.contrib.auth.views import LoginView, LogoutView, redirect_to_login
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DetailView, ListView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from .forms import CreateCourseForm, LoginForm, SignupForm, CreateLessonForm
 from .models import Course, UserProfile, Lesson
@@ -26,6 +26,13 @@ class Signup(CreateView):
     success_url = reverse_lazy('main_page')
 
 
+class Logout(View):
+    def get(self, request):
+        logout(request)
+        return redirect('login')
+
+
+
 class MainPage(ListView):
     model = Course
     template_name = 'main/main_page.html'
@@ -43,7 +50,6 @@ class CreateCourse(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         form.instance.status = 'draft'
-        print('Save form')
         return super().form_valid(form)
 
 
@@ -52,11 +58,13 @@ class OneCourse(DetailView):
     template_name = 'main/one_course.html'
     context_object_name = 'course'
 
+
 class CreateLesson(CreateView):
     model = Lesson
     form_class = CreateLessonForm
     template_name = 'main/create_lesson.html'
     success_url = reverse_lazy('main_page')
+
 
 class Lessons(ListView):
     model = Lesson
@@ -64,18 +72,30 @@ class Lessons(ListView):
     context_object_name = 'lessons'
     paginate_by = 8
 
+
 class OneLesson(DetailView):
     model = Lesson
     template_name = 'main/one_lesson.html'
     context_object_name = 'lesson'
+
 
 class Profile(DetailView):
     model = UserProfile
     template_name = 'main/profile.html'
     context_object_name = 'user'
 
-class Logout(View):
-    def get(self, request):
-        logout(request)
-        return redirect('login')
 
+class UpdateCourse(UpdateView):
+    model = Course
+    form_class = CreateCourseForm
+    template_name = 'main/update_course.html'
+
+    def get_success_url(self):
+        return reverse_lazy('one_course', kwargs={'pk', self.object.pk})
+
+class DeleteCourse(DetailView):
+    model = Course
+    template_name = 'main/course_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('one_course', kwargs={'pk', self.object.pk})

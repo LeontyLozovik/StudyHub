@@ -7,27 +7,36 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="text-center mb-5">
-    <h1>{{ course.course_name }}</h1>
 
-    <span class="badge
-        {% if course.level == 'starter_level' %}bg-primary
-        {% elif course.level == 'middle_level' %}bg-warning text-dark
-        {% elif course.level == 'advanced_level' %}bg-danger
-        {% else %}bg-secondary
+    <div class="text-center mb-5 position-relative">
+        {% if user.username == course.author.username %}
+            <div class="position-absolute top-0 end-0">
+                <a href="{% url 'update_course' course.pk %}" class="btn btn-primary btn-sm me-2">Update</a>
+                <a href="{% url 'delete_course' course.pk %}" class="btn btn-danger btn-sm">Delete</a>
+            </div>
         {% endif %}
-    ">
-        {{ course.get_level_display }}
-    </span>
-</div>
+
+        <h1 class="mb-3">{{ course.course_name }}</h1>
+
+        <span class="badge
+            {% if course.level == 'starter_level' %}bg-primary
+            {% elif course.level == 'middle_level' %}bg-warning text-dark
+            {% elif course.level == 'advanced_level' %}bg-danger
+            {% else %}bg-secondary
+            {% endif %}
+        ">
+            {{ course.get_level_display }}
+        </span>
+    </div>
+
 
     <div class="mb-4">
-        <h4>Описание курса</h4>
+        <h4>Course description</h4>
         <p>{{ course.description }}</p>
     </div>
 
     <div class="mb-5">
-        <h4>Уроки</h4>
+        <h4>Lessons</h4>
         <div class="lesson-carousel d-flex overflow-auto gap-3">
             {% for lesson in course.lessons.all %}
                 <div class="lesson-card card flex-shrink-0" style="width: 250px;">
@@ -39,14 +48,15 @@
                     </div>
                 </div>
             {% empty %}
-                <p>Уроки не добавлены.</p>
+                <p>No lessons</p>
             {% endfor %}
         </div>
     </div>
 
     <div class="text-end text-muted">
-        Автор: {{ course.author.username }}<br>
-        Дата публикации: {{ course.date_of_publication }}
+        Author: {{ course.author.username }}<br>
+        Published: {{ course.date_of_publication }}
     </div>
+
 </div>
 {% endblock %}
