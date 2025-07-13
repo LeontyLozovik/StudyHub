@@ -45,7 +45,6 @@
     <div class="lesson-carousel d-flex overflow-auto gap-3">
         {% for lesson in course.lessons.all %}
         <div class="lesson-card card flex-shrink-0 position-relative" style="width: 250px;">
-            <!-- Кнопка удаления -->
             <a href="{% url 'delete_lesson' lesson.pk %}"
                class="delete-lesson-btn"
                title="Delete lesson"
@@ -65,7 +64,6 @@
         {% endfor %}
     </div>
 
-    <!-- Квадратная кнопка с прозрачным плюсом для добавления урока -->
     <a href="{% url 'main_page' %}" class="add-lesson-btn" title="Add lesson"></a>
 </div>
 {% endblock %}

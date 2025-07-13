@@ -15,5 +15,7 @@ urlpatterns = [
     path('lesson/<int:pk>/', OneLesson.as_view(), name='one_lesson'),
     path('profile/<int:pk>/', Profile.as_view(), name='profile'),
     path('course/update/<int:pk>/', UpdateCourse.as_view(), name='update_course'),
-    path('course/delete/<int:pk>/', DeleteCourse.as_view(), name='delete_course')
+    path('course/delete/<int:pk>/', DeleteCourse.as_view(), name='delete_course'),
+    path('lesson/update/<int:pk>/', UpdateLesson.as_view(), name='update_lesson'),
+    path('lesson/delete/<int:pk>/', DeleteLesson.as_view(), name='delete_lesson'),
 ]

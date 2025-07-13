@@ -65,6 +65,10 @@ class CreateLesson(CreateView):
     template_name = 'main/create_lesson.html'
     success_url = reverse_lazy('main_page')
 
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
 
 class Lessons(ListView):
     model = Lesson
@@ -84,6 +88,13 @@ class Profile(DetailView):
     template_name = 'main/profile.html'
     context_object_name = 'user'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['published_courses'] = user.my_courses.filter(status='published').order_by('-date_of_publication')
+        context['draft_courses'] = user.my_courses.filter(status='draft').order_by('-date_of_publication')
+        return context
+
 
 class UpdateCourse(UpdateView):
     model = Course
@@ -93,9 +104,27 @@ class UpdateCourse(UpdateView):
     def get_success_url(self):
         return reverse_lazy('one_course', kwargs={'pk', self.object.pk})
 
+
 class DeleteCourse(DetailView):
     model = Course
     template_name = 'main/course_confirm_delete.html'
 
     def get_success_url(self):
         return reverse_lazy('one_course', kwargs={'pk', self.object.pk})
+
+
+class UpdateLesson(UpdateView):
+    model = Lesson
+    form_class = CreateLessonForm
+    template_name = 'main/update_lesson.html'
+
+    def get_success_url(self):
+        return reverse_lazy('one_lesson', kwargs={'pk', self.object.pk})
+
+
+class DeleteLesson(DetailView):
+    model = Lesson
+    template_name = 'main/lesson_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('one_lesson', kwargs={'pk', self.object.pk})

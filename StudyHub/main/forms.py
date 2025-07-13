@@ -101,7 +101,6 @@ class CreateLessonForm(ModelForm):
             'video': ClearableFileInput(attrs={
                 'class': 'form-control-file',
                 'id': 'id_video',
-                'style': 'display: none;',
                 'accept': 'video/*'
             }),
         }

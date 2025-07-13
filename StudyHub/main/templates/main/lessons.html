@@ -17,7 +17,7 @@
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title">{{ lesson.lesson_name|truncatechars:50 }}</h5>
                             <p class="card-text small text-muted">{{ lesson.description|truncatechars:80 }}</p>
-                            <a href="{% url 'lesson_detail' lesson.pk %}" class="mt-auto btn btn-outline-primary">Смотреть</a>
+                            <a href="{% url 'one_lesson' lesson.pk %}" class="mt-auto btn btn-outline-primary">Смотреть</a>
                         </div>
                     </div>
                 </div>

@@ -7,7 +7,18 @@
 
 {% block content %}
 <div class="lesson-container mx-auto mt-4">
-    <h2 class="lesson-title text-center mb-4">{{ lesson.lesson_name }}</h2>
+
+    <div class="lesson-description">
+        <div class="text-center position-relative mb-4">
+            <h2 class="lesson-title">{{ lesson.lesson_name }}</h2>
+            {% if user == lesson.author %}
+                <div class="position-absolute top-0 end-0">
+                    <a href="{% url 'update_lesson' lesson.pk %}" class="btn btn-primary btn-sm me-2">Update</a>
+                    <a href="{% url 'delete_lesson' lesson.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 
     <div class="video-wrapper mb-4">
         {% if lesson.video %}
@@ -27,10 +38,6 @@
         <p>{{ lesson.description }}</p>
     </div>
 
-    <div class="back-link mt-4">
-        <a href="{% url 'course_detail' lesson.course.id %}" class="btn btn-outline-primary">
-            ← Назад к курсу "{{ lesson.course.course_name }}"
-        </a>
-    </div>
+
 </div>
 {% endblock %}

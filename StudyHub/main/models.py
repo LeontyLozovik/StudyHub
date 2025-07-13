@@ -86,7 +86,7 @@ class Course(models.Model):
 
 class Lesson(models.Model):
     author = models.ForeignKey(to=UserProfile, on_delete=models.SET_NULL, null=True, related_name='my_lessons')
-    course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='lessons')
+    course = models.ForeignKey(to=Course, on_delete=models.SET_NULL, related_name='lessons', null=True, blank=True)
     lesson_name = models.TextField(blank=False, null=False)
     description = models.TextField(blank=False, null=False)
     video = models.FileField(upload_to='main/video/')
