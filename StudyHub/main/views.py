@@ -159,3 +159,18 @@ class ChangePassword(FormView):
         update_session_auth_hash(self.request, user)
         return super().form_valid(form)
 
+class Search(ListView):
+    model = Course
+    template_name = 'main/search.html'
+    context_object_name = 'results'
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        if query:
+            return Course.objects.filter(course_name__icontains=query)
+        return Course.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['query'] = self.request.GET.get('q', '')
+        return context
