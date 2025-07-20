@@ -18,4 +18,6 @@ urlpatterns = [
     path('course/delete/<int:pk>/', DeleteCourse.as_view(), name='delete_course'),
     path('lesson/update/<int:pk>/', UpdateLesson.as_view(), name='update_lesson'),
     path('lesson/delete/<int:pk>/', DeleteLesson.as_view(), name='delete_lesson'),
+    path('course/change_status/<int:pk>', change_status, name ='change_status'),
+    path('change_password/', ChangePassword.as_view(), name='change_password')
 ]

@@ -1,10 +1,12 @@
-from django.contrib.auth import logout
+from django.contrib.auth import logout, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, LogoutView, redirect_to_login
-from django.shortcuts import render, redirect
+from django.contrib.auth.views import LoginView
+from django.shortcuts import redirect, get_object_or_404
+from django.template.context_processors import request
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, FormView
 
 from .forms import CreateCourseForm, LoginForm, SignupForm, CreateLessonForm
 from .models import Course, UserProfile, Lesson
@@ -128,3 +130,32 @@ class DeleteLesson(DetailView):
 
     def get_success_url(self):
         return reverse_lazy('one_lesson', kwargs={'pk', self.object.pk})
+
+
+def change_status(request, pk):
+    course = get_object_or_404(Course, pk=pk)
+    if course.status == 'draft':
+        course.status = 'published'
+    else:
+        course.status = 'draft'
+    course.save()
+    return redirect('profile', pk=request.user.pk)
+
+
+class ChangePassword(FormView):
+    form_class = PasswordChangeForm
+    template_name = 'main/change_password.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_success_url(self):
+        return reverse_lazy('profile', kwargs={'pk' : self.request.user.pk})
+
+    def form_valid(self, form):
+        user = form.save()
+        update_session_auth_hash(self.request, user)
+        return super().form_valid(form)
+
