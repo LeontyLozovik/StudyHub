@@ -22,5 +22,6 @@ urlpatterns = [
     path('change_password/', ChangePassword.as_view(), name='change_password'),
     path('search/', Search.as_view(), name='search'),
     path('favorites/', Favorites.as_view(), name='favorites'),
-    path('favorietes/change_state/<int:pk>/', fav_status_change, name='fav_change')
+    path('favorietes/change_state/<int:pk>/', fav_status_change, name='fav_change'),
+    path('course/finish/<int:pk>', Feedback.as_view(), name='finish')
 ]

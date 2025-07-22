@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.forms import ModelForm, ClearableFileInput, TextInput, Select, Textarea
+from django.forms import ModelForm, ClearableFileInput, TextInput, Select, Textarea, IntegerField, HiddenInput
 
-from .models import Course, UserProfile, Lesson
+from .models import Course, UserProfile, Lesson, Review
 
 
 class LoginForm(AuthenticationForm):
@@ -103,4 +103,16 @@ class CreateLessonForm(ModelForm):
                 'id': 'id_video',
                 'accept': 'video/*'
             }),
+        }
+
+class FeedbackForm(ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rate', 'comment']
+        widgets = {
+            'comment' : Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4
+            }),
+            'rate': HiddenInput()
         }

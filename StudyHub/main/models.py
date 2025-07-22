@@ -22,14 +22,6 @@ NOTE_CHOICE = [
     ('private', 'Private')
 ]
 
-RATE_CHOICE = [
-    ('one', 1),
-    ('two', 2),
-    ('three', 3),
-    ('four', 4),
-    ('five', 5)
-]
-
 NOTIFICATION_STATUS = [
     ('unreaded', 'Unreaded'),
     ('readed', 'Readed')
@@ -137,7 +129,7 @@ class Progress(models.Model):
 class Review(models.Model):
     user = models.ForeignKey(to=UserProfile,on_delete=models.CASCADE, related_name='user_reviews')
     course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='course_reviews')
-    rate = models.PositiveSmallIntegerField(choices=RATE_CHOICE, blank=False, null=False)
+    rate = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True, null=True)
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=False, null=False)
 

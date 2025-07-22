@@ -8,8 +8,8 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, FormView
 
-from .forms import CreateCourseForm, LoginForm, SignupForm, CreateLessonForm
-from .models import Course, UserProfile, Lesson
+from .forms import CreateCourseForm, LoginForm, SignupForm, CreateLessonForm, FeedbackForm
+from .models import Course, UserProfile, Lesson, Review
 
 
 # Create your views here.
@@ -202,4 +202,26 @@ def fav_status_change(request, pk):
 
     return redirect('main_page')
 
+class Feedback(FormView):
+    model = Review
+    form_class = FeedbackForm
+    template_name = 'main/feedback.html'
+    success_url = 'main_page'
 
+    def form_valid(self, form):
+        action = self.request.POST.get('action')
+        if action == 'skip':
+            return redirect('main_page')
+
+        rate = form.cleaned_data.get('rate')
+        if not rate:
+            form.add_error('rate', 'Please rate or skip')
+            return self.form_invalid(form)
+
+        Review.objects.create(
+            user = self.request.user,
+            course = Course.objects.get(pk=self.kwargs['pk']),
+            rate = rate,
+            comment = form.cleaned_data.get('comment', '')
+        )
+        return redirect('main_page')
