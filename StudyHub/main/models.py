@@ -3,7 +3,7 @@ from tkinter.constants import CASCADE
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import Index
+from django.db.models import Index, ForeignKey
 from django_countries.fields import CountryField
 
 LEVEL_CHOICES = [
@@ -53,6 +53,7 @@ class UserProfile(AbstractUser):
     )
     bio = models.TextField(blank=True, null=True)
     country = CountryField(blank_label='Choose your country', default='BY')
+    favorites = models.ManyToManyField('Course', related_name='favorited_by', blank=True)
 
     class Meta:
         db_table = 'user_profile'
@@ -75,6 +76,7 @@ class Course(models.Model):
     date_of_publication = models.DateField(auto_now_add=True, blank=False, null=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICE, blank=False, null=False)
     users = models.ManyToManyField(to=UserProfile, related_name='courses')
+
 
     class Meta:
         db_table = 'courses'

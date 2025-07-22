@@ -3,7 +3,9 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'main/styles/main_page.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
+
 
 {% block content %}
 <h2 class="mb-4">All courses</h2>
@@ -15,6 +17,17 @@
         <a href="{% url 'one_course' course.pk %}" class="text-decoration-none text-dark">
             <div class="card course-card h-100 position-relative">
                 <img src="{{ course.cover.url }}" class="card-img-top course-cover" alt="{{ course.course_name }}">
+
+                <a href="{% url 'fav_change' course.pk %}" class="text-decoration-none">
+                    <div class="position-absolute top-0 start-0 m-2">
+                        <button
+                            class="favorite-btn border-0 bg-transparent p-0"
+                            data-course-id="{{ course.id }}"
+                            aria-label="Toggle Favorite">
+                            <i class="fa-star favorite-icon {% if course in favorites %}fa-solid text-warning{% else %}fa-regular{% endif %}"></i>
+                        </button>
+                    </div>
+                </a>
 
                 <div class="level-badge badge position-absolute top-0 end-0 m-2 text-white
                      {% if course.level == 'starter_level' %}bg-primary
@@ -39,3 +52,8 @@
     {% endfor %}
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'main/js/favorite.js' %}"></script>
+{% endblock %}
+

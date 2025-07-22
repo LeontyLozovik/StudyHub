@@ -42,6 +42,12 @@ class MainPage(ListView):
     paginate_by = 8
     ordering = ['-date_of_publication']
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_obj = self.request.user
+        context['favorites'] = user_obj.favorites.all()
+        return context
+
 
 class CreateCourse(LoginRequiredMixin, CreateView):
     model = Course
@@ -167,10 +173,33 @@ class Search(ListView):
     def get_queryset(self):
         query = self.request.GET.get('q')
         if query:
-            return Course.objects.filter(course_name__icontains=query)
+            return Course.objects.filter(course_name__icontains=query, status='published')
         return Course.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['query'] = self.request.GET.get('q', '')
         return context
+
+class Favorites(ListView):
+    model = Course
+    template_name = 'main/favorites.html'
+    context_object_name = 'favorites'
+
+    def get_queryset(self):
+        user_obj = get_object_or_404(UserProfile, pk=self.request.user.pk)
+        return user_obj.favorites.all()
+
+
+def fav_status_change(request, pk):
+    course = get_object_or_404(Course, pk=pk)
+    user_obj = request.user
+
+    if course in user_obj.favorites.all():
+        user_obj.favorites.remove(course)
+    else:
+        user_obj.favorites.add(course)
+
+    return redirect('main_page')
+
+

@@ -30,3 +30,29 @@
     font-size: 0.75rem;
     font-style: italic;
 }
+
+.favorite-icon {
+  font-size: 1.2rem;
+  color: gold;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+}
+
+.favorite-icon {
+  font-size: 1.3rem;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.favorite-icon.fa-regular {
+  opacity: 0.6;
+}
+
+.favorite-icon.fa-solid {
+  opacity: 1;
+}
+
+.favorite-icon:hover {
+  opacity: 1;
+}
+

@@ -20,5 +20,7 @@ urlpatterns = [
     path('lesson/delete/<int:pk>/', DeleteLesson.as_view(), name='delete_lesson'),
     path('course/change_status/<int:pk>', change_status, name ='change_status'),
     path('change_password/', ChangePassword.as_view(), name='change_password'),
-    path('search/', Search.as_view(), name='search')
+    path('search/', Search.as_view(), name='search'),
+    path('favorites/', Favorites.as_view(), name='favorites'),
+    path('favorietes/change_state/<int:pk>/', fav_status_change, name='fav_change')
 ]
