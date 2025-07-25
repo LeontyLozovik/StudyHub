@@ -2,14 +2,15 @@ from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, get_object_or_404
 from django.template.context_processors import request
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DetailView, ListView, UpdateView, FormView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, FormView, DeleteView
 
 from .forms import CreateCourseForm, LoginForm, SignupForm, CreateLessonForm, FeedbackForm
-from .models import Course, UserProfile, Lesson, Review
+from .models import Course, UserProfile, Lesson, Review, Note
 
 
 # Create your views here.
@@ -89,6 +90,22 @@ class OneLesson(DetailView):
     model = Lesson
     template_name = 'main/one_lesson.html'
     context_object_name = 'lesson'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        lesson = self.get_object()
+        filter_type = self.request.GET.get('filter', 'all')
+
+        if filter_type == 'my':
+            notes = lesson.notes_to_lesson.filter(user=self.request.user)
+        elif filter_type == 'private':
+            notes = lesson.notes_to_lesson.filter(user=self.request.user, availability='private')
+        else:
+            notes = lesson.notes_to_lesson.filter(availability='public')
+
+        context['notes'] = notes
+        return context
+
 
 
 class Profile(DetailView):
@@ -225,3 +242,41 @@ class Feedback(FormView):
             comment = form.cleaned_data.get('comment', '')
         )
         return redirect('main_page')
+
+
+def create_note(request, pk):
+    def get_availability():
+        if request.POST.get('is_private') == 'on':
+            return 'private'
+        return 'public'
+
+    Note.objects.create(
+        lesson = Lesson.objects.get(pk=pk),
+        user = request.user,
+        content = request.POST.get('note'),
+        availability = get_availability()
+    )
+
+    return redirect('one_lesson', pk)
+
+
+def update_note(request, pk):
+    note = get_object_or_404(Note, pk=pk)
+
+    if request.user != note.user:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        if content:
+            note.content = content
+            note.save()
+
+    return redirect('one_lesson', pk=note.lesson.pk)
+
+
+class DeleteNote(DeleteView):
+    model = Note
+
+    def get_success_url(self):
+        return reverse_lazy('one_lesson', kwargs={'pk': self.object.lesson.pk})

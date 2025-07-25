@@ -23,5 +23,8 @@ urlpatterns = [
     path('search/', Search.as_view(), name='search'),
     path('favorites/', Favorites.as_view(), name='favorites'),
     path('favorietes/change_state/<int:pk>/', fav_status_change, name='fav_change'),
-    path('course/finish/<int:pk>', Feedback.as_view(), name='finish')
+    path('course/finish/', Feedback.as_view(), name='finish'),
+    path('lesson/<int:pk>/create_note/', create_note, name='create_note'),
+    path('lesson/note/update/<int:pk>', update_note, name='update_note'),
+    path('lesson/note/delete/<int:pk>', DeleteNote.as_view(), name='delete_note')
 ]
