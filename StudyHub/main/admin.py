@@ -20,7 +20,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'course', 'lesson_name', 'description']
+    list_display = ['pk', 'lesson_name', 'description']
     list_filter = ['course']
     search_fields = ['pk', 'lesson_name']
 

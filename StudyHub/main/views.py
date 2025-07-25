@@ -280,3 +280,12 @@ class DeleteNote(DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('one_lesson', kwargs={'pk': self.object.lesson.pk})
+
+
+def add_to_course(request, pk):
+    course_id = request.POST.get('course_id')
+    course = get_object_or_404(Course, pk=course_id)
+    lesson = get_object_or_404(Lesson, pk=pk)
+    course.lessons.add(lesson)
+    course.save()
+    return redirect('profile', pk=request.user.pk)
