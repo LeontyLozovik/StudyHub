@@ -14,8 +14,8 @@
             <h2 class="lesson-title">{{ lesson.lesson_name }}</h2>
             {% if user == lesson.author %}
                 <div class="position-absolute top-0 end-0">
-                    <a href="{% url 'update_lesson' lesson.pk %}" class="btn btn-primary btn-sm me-2">Update</a>
-                    <a href="{% url 'delete_lesson' lesson.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    <a href="{% url 'update_lesson' lesson.pk %}" class="btn btn-primary btn-sm me-2 text-decoration-none">Update</a>
+                    <a href="{% url 'delete_lesson' lesson.pk %}" class="btn btn-danger btn-sm text-decoration-none">Delete</a>
                 </div>
             {% endif %}
         </div>
@@ -57,11 +57,11 @@
     </form>
     <div class="d-flex justify-content-start gap-3 mt-3 ps-2">
         <a href="?filter=all"
-           class="note-filter-link {% if request.GET.filter == 'all' or not request.GET.filter %}active{% endif %}">All</a>
+           class="note-filter-link {% if request.GET.filter == 'all' or not request.GET.filter %}active{% endif %} text-decoration-none">All</a>
         <a href="?filter=my"
-           class="note-filter-link {% if request.GET.filter == 'my' %}active{% endif %}">Only My</a>
+           class="note-filter-link {% if request.GET.filter == 'my' %}active{% endif %} text-decoration-none">Only My</a>
         <a href="?filter=private"
-           class="note-filter-link {% if request.GET.filter == 'private' %}active{% endif %}">Only Private</a>
+           class="note-filter-link {% if request.GET.filter == 'private' %}active{% endif %} text-decoration-none">Only Private</a>
     </div>
 
     {% if notes %}
