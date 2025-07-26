@@ -36,21 +36,18 @@
     </div>
 
     <div class="mb-5">
-        <h4>Lessons</h4>
-        <div class="lesson-carousel d-flex overflow-auto gap-3">
-            {% for lesson in course.lessons.all %}
-                <div class="lesson-card card flex-shrink-0" style="width: 250px;">
-                    <div class="card-img-top video-thumbnail">
-                        <video src="{{ lesson.video.url }}" muted preload="metadata" style="width:100%; height:150px; object-fit:cover;" controls></video>
-                    </div>
-                    <div class="card-body">
-                        <h6 class="card-title text-center">{{ lesson.lesson_name }}</h6>
-                    </div>
-                </div>
+        <h4>Lessons:</h4>
+        <ol class="ps-3 text-muted">
+            {% for lesson in ordered_lesson %}
+                <li>{{ lesson.lesson_name }}</li>
             {% empty %}
                 <p>No lessons</p>
             {% endfor %}
-        </div>
+        </ol>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'start_course' course.pk %}" class="btn btn-success text-decoration-none">Start course</a>
     </div>
 
     <div class="text-end text-muted">

@@ -11,18 +11,18 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ['pk', 'username', 'email']
 
 
-@admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'author', 'course_name', 'description', 'level', 'status', 'date_of_publication']
-    list_filter = ['author', 'level', 'status']
-    search_fields = ['pk', 'author', 'course_name', 'date_of_publication']
+#@admin.register(Course)
+#class CourseAdmin(admin.ModelAdmin):
+#    list_display = ['pk', 'author', 'course_name', 'description', 'level', 'status', 'date_of_publication']
+#    list_filter = ['author', 'level', 'status']
+#    search_fields = ['pk', 'author', 'course_name', 'date_of_publication']
 
 
-@admin.register(Lesson)
-class LessonAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'lesson_name', 'description']
-    list_filter = ['course']
-    search_fields = ['pk', 'lesson_name']
+#@admin.register(Lesson)
+#class LessonAdmin(admin.ModelAdmin):
+#    list_display = ['pk', 'lesson_name', 'description']
+#    list_filter = ['course']
+#    search_fields = ['pk', 'lesson_name']
 
 
 @admin.register(Note)

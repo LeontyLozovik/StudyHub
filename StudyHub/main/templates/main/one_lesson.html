@@ -39,6 +39,10 @@
         {% endif %}
     </div>
 </div>
+
+{% block nav %}
+{% endblock %}
+
 <div class="lesson-container mx-auto mt-4">
     <form method="post" action="{% url 'create_note' lesson.pk %}">
         {% csrf_token %}

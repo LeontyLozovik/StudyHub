@@ -83,12 +83,24 @@ class Lesson(models.Model):
     lesson_name = models.TextField(blank=False, null=False)
     description = models.TextField(blank=False, null=False)
     video = models.FileField(upload_to='main/video/')
-    course = models.ManyToManyField(to=Course,related_name='lessons', blank=True)
+    course = models.ManyToManyField(to=Course, through='CourseLesson', related_name='lessons', blank=True)
 
     class Meta:
         db_table = 'lessons'
         verbose_name = 'Lessons'
         verbose_name_plural = 'Lesson'
+
+
+class CourseLesson(models.Model):
+    course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='lesson_links')
+    lesson = models.ForeignKey(to=Lesson, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField()
+
+    class Meta:
+        db_table = 'course_lesson'
+        verbose_name = 'CourseLessons'
+        ordering = ['order']
+        unique_together = ('course', 'lesson')
 
 
 class Note(models.Model):

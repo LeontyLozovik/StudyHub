@@ -2,15 +2,17 @@ from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.db import models
 from django.http import HttpResponseForbidden
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, render
 from django.template.context_processors import request
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, FormView, DeleteView
+from .mixins import NotesMixin
 
 from .forms import CreateCourseForm, LoginForm, SignupForm, CreateLessonForm, FeedbackForm
-from .models import Course, UserProfile, Lesson, Review, Note
+from .models import Course, UserProfile, Lesson, Review, Note, CourseLesson
 
 
 # Create your views here.
@@ -67,6 +69,13 @@ class OneCourse(DetailView):
     template_name = 'main/one_course.html'
     context_object_name = 'course'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        class_lesson = CourseLesson.objects.filter(course=self.get_object()).order_by('order')
+        context['ordered_lesson'] = [cl.lesson for cl in class_lesson]
+        return context
+
+
 
 class CreateLesson(CreateView):
     model = Lesson
@@ -86,7 +95,7 @@ class Lessons(ListView):
     paginate_by = 8
 
 
-class OneLesson(DetailView):
+class OneLesson(DetailView, NotesMixin):
     model = Lesson
     template_name = 'main/one_lesson.html'
     context_object_name = 'lesson'
@@ -94,16 +103,7 @@ class OneLesson(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         lesson = self.get_object()
-        filter_type = self.request.GET.get('filter', 'all')
-
-        if filter_type == 'my':
-            notes = lesson.notes_to_lesson.filter(user=self.request.user)
-        elif filter_type == 'private':
-            notes = lesson.notes_to_lesson.filter(user=self.request.user, availability='private')
-        else:
-            notes = lesson.notes_to_lesson.filter(availability='public')
-
-        context['notes'] = notes
+        context['notes'] = self.get_notes(lesson)
         return context
 
 
@@ -286,6 +286,24 @@ def add_to_course(request, pk):
     course_id = request.POST.get('course_id')
     course = get_object_or_404(Course, pk=course_id)
     lesson = get_object_or_404(Lesson, pk=pk)
-    course.lessons.add(lesson)
-    course.save()
+
+    last_order = (CourseLesson.objects.filter(course=course).aggregate(max_order=models.Max('order'))['max_order']) or 0
+
+    CourseLesson.objects.create(course=course, lesson=lesson, order=last_order + 1)
+
     return redirect('profile', pk=request.user.pk)
+
+
+class StartCourse(View, NotesMixin):
+    template_name = 'main/lesson_course.html'
+
+    def get(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+        course_lesson = get_object_or_404(CourseLesson, course=course, order=1)
+        lesson = course_lesson.lesson
+        notes = self.get_notes(lesson)
+
+        return render(request, self.template_name, {
+            'lesson': lesson,
+            'notes': notes
+        })
