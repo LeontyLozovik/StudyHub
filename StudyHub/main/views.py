@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -12,7 +14,7 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView, F
 from .mixins import NotesMixin
 
 from .forms import CreateCourseForm, LoginForm, SignupForm, CreateLessonForm, FeedbackForm
-from .models import Course, UserProfile, Lesson, Review, Note, CourseLesson
+from .models import Course, UserProfile, Lesson, Review, Note, CourseLesson, Progress, LessonViewLog
 
 
 # Create your views here.
@@ -305,5 +307,62 @@ class StartCourse(View, NotesMixin):
 
         return render(request, self.template_name, {
             'lesson': lesson,
-            'notes': notes
+            'notes': notes,
+            'course_pk': pk,
+            'order': 1
         })
+
+class FlipPage(View, NotesMixin):
+    template_name = 'main/lesson_course.html'
+
+    def get(self, request, pk):
+        direction = request.GET.get('flip')
+        order = request.GET.get('order')
+        course = get_object_or_404(Course, pk=pk)
+        last = CourseLesson.objects.filter(course=course).count()
+        if direction == 'next':
+            next_order = int(order) + 1
+            course_lesson = get_object_or_404(CourseLesson, course=course, order=next_order)
+        else:
+            next_order = int(order) - 1
+            course_lesson = get_object_or_404(CourseLesson, course=course, order=next_order)
+        lesson = course_lesson.lesson
+        complete_button  = LessonViewLog.objects.filter(
+            user=request.user,
+            course=course,
+            lesson=lesson
+        ).exists()
+        notes = self.get_notes(lesson)
+
+        LessonViewLog.objects.create(
+            user=self.request.user,
+            course=course,
+            lesson=lesson
+        )
+
+        return render(request, self.template_name, {
+            'lesson': lesson,
+            'notes': notes,
+            'course_pk': pk,
+            'order': next_order,
+            'first': next_order == 1,
+            'last': next_order == last,
+            'completed': complete_button
+        })
+
+
+class LessonDone(View):
+    def post(self, request, *args, **kwargs):
+        course = get_object_or_404(Course, pk=kwargs['course_pk'])
+        total = CourseLesson.objects.filter(course=course).count()
+        compile_num = Progress.objects.filter(user=request.user, course=course).count() + 1
+        precent_of_complete = round(Decimal(compile_num) / Decimal(total) * 100, 2)
+        # Отлавливать IntegrityError на нарушение unique_together
+        Progress.objects.create(
+            user = request.user,
+            course = course,
+            precent_of_complete = precent_of_complete
+        )
+        print(request.POST.get('path'))
+        return redirect(request.POST.get('path'))
+

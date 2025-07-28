@@ -28,5 +28,7 @@ urlpatterns = [
     path('lesson/note/update/<int:pk>', update_note, name='update_note'),
     path('lesson/note/delete/<int:pk>', DeleteNote.as_view(), name='delete_note'),
     path('lesson/<int:pk>/add_to_course/', add_to_course, name='add_lesson_to_course'),
-    path('course/<int:pk>/start', StartCourse.as_view(), name='start_course')
+    path('course/<int:pk>/start', StartCourse.as_view(), name='start_course'),
+    path('course/<int:pk>/flip/', FlipPage.as_view(), name = 'flip'),
+    path('course/<int:course_pk>/lesson/<int:lesson_pk>/done/', LessonDone.as_view(), name='lesson_done')
 ]

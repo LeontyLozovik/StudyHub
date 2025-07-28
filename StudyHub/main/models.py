@@ -78,6 +78,18 @@ class Course(models.Model):
         indexes = [Index(fields=['-date_of_publication'])]
 
 
+class CourseLesson(models.Model):
+    course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='lesson_links')
+    lesson = models.ForeignKey(to='Lesson', on_delete=models.CASCADE)
+    order = models.PositiveIntegerField()
+
+    class Meta:
+        db_table = 'course_lesson'
+        verbose_name = 'CourseLessons'
+        ordering = ['order']
+        unique_together = ('course', 'lesson')
+
+
 class Lesson(models.Model):
     author = models.ForeignKey(to=UserProfile, on_delete=models.SET_NULL, null=True, related_name='my_lessons')
     lesson_name = models.TextField(blank=False, null=False)
@@ -91,16 +103,36 @@ class Lesson(models.Model):
         verbose_name_plural = 'Lesson'
 
 
-class CourseLesson(models.Model):
-    course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='lesson_links')
-    lesson = models.ForeignKey(to=Lesson, on_delete=models.CASCADE)
-    order = models.PositiveIntegerField()
+class LessonViewLog(models.Model):
+    user = models.ForeignKey(to=UserProfile, on_delete=models.CASCADE, related_name='lesson_view_log')
+    lesson = models.ForeignKey(to=Lesson, on_delete=models.CASCADE, related_name='view_log')
+    course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='view_log')
+    is_completed = models.BooleanField(default=False)
+    last_activity = models.DateTimeField(auto_now=True, blank=False, null=False)
 
     class Meta:
-        db_table = 'course_lesson'
-        verbose_name = 'CourseLessons'
-        ordering = ['order']
-        unique_together = ('course', 'lesson')
+        db_table = 'lesson_view_log'
+        indexes = [Index(fields=['-last_activity'])]
+        unique_together = ('user', 'lesson', 'course')
+
+
+class Progress(models.Model):
+    user = models.ForeignKey(to=UserProfile, on_delete=models.CASCADE, related_name='users_progresses')
+    course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='courses_progresses')
+    precent_of_complete = models.DecimalField(
+        blank=False,
+        null=False,
+        max_digits=5,
+        decimal_places=2,
+        default=0.0,
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+    )
+
+    class Meta:
+        db_table = 'progresses'
+        verbose_name = 'Progresses'
+        verbose_name_plural = 'Progress'
+        ordering = ['id']
 
 
 class Note(models.Model):
@@ -115,26 +147,6 @@ class Note(models.Model):
         verbose_name = 'Notes'
         verbose_name_plural = 'Note'
         ordering = ['id', '-created_at']
-
-
-class Progress(models.Model):
-    user = models.ForeignKey(to=UserProfile, on_delete=models.CASCADE, related_name='users_progresses')
-    course = models.ForeignKey(to=Course, on_delete=models.CASCADE, related_name='courses_progresses')
-    precent_of_complete = models.DecimalField(
-        blank=False,
-        null=False,
-        max_digits=5,
-        decimal_places=2,
-        default=0.0,
-        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
-    )
-    last_activity = models.DateTimeField(auto_now=True, blank=False, null=False)
-
-    class Meta:
-        db_table = 'progresses'
-        verbose_name = 'Progresses'
-        verbose_name_plural = 'Progress'
-        ordering = ['id', '-last_activity']
 
 
 

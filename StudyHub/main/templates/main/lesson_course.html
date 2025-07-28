@@ -2,8 +2,24 @@
 {% load static %}
 
 {% block nav %}
+    {% if complete %}
+        <div class="text-center mt-3">
+            <form method="post" action="{% url 'lesson_done' course_pk lesson.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="path" value="{{ request.get_full_path }}">
+                <button class="btn btn-success">Mark as completed</button>
+            </form>
+        </div>
+    {% endif %}
     <div class="text-center mt-3">
-      <a class="btn btn-secondary text-decoration-none">Previous</a>
-      <a class="btn btn-primary text-decoration-none">Next</a>
+        {% if first %}
+            <a href="{% url 'flip' course_pk %}?flip=next&order={{ order }}" class="btn btn-primary text-decoration-none">Next</a>
+        {% elif last %}
+            <a href="{% url 'flip' course_pk %}?flip=prev&order={{ order }}" class="btn btn-secondary text-decoration-none">Previous</a>
+            <a href="{% url 'finish' %}" class="btn btn-success px-4 text-decoration-none">Finish Course</a>
+        {% else %}
+            <a href="{% url 'flip' course_pk %}?flip=prev&order={{ order }}" class="btn btn-secondary text-decoration-none">Previous</a>
+            <a href="{% url 'flip' course_pk %}?flip=next&order={{ order }}" class="btn btn-primary text-decoration-none">Next</a>
+        {% endif %}
     </div>
 {% endblock %}
