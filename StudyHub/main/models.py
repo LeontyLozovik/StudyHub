@@ -3,7 +3,7 @@ from tkinter.constants import CASCADE
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import Index, ForeignKey
+from django.db.models import Index, ForeignKey, UniqueConstraint
 from django_countries.fields import CountryField
 
 LEVEL_CHOICES = [
@@ -113,7 +113,9 @@ class LessonViewLog(models.Model):
     class Meta:
         db_table = 'lesson_view_log'
         indexes = [Index(fields=['-last_activity'])]
-        unique_together = ('user', 'lesson', 'course')
+        # constraints = [
+        #     UniqueConstraint(fields=['user', 'lesson', 'course'], name='unique_user_lesson_course')
+        # ]
 
 
 class Progress(models.Model):
@@ -133,6 +135,7 @@ class Progress(models.Model):
         verbose_name = 'Progresses'
         verbose_name_plural = 'Progress'
         ordering = ['id']
+
 
 
 class Note(models.Model):

@@ -309,7 +309,8 @@ class StartCourse(View, NotesMixin):
             'lesson': lesson,
             'notes': notes,
             'course_pk': pk,
-            'order': 1
+            'order': 1,
+            'first': True
         })
 
 class FlipPage(View, NotesMixin):
@@ -327,17 +328,18 @@ class FlipPage(View, NotesMixin):
             next_order = int(order) - 1
             course_lesson = get_object_or_404(CourseLesson, course=course, order=next_order)
         lesson = course_lesson.lesson
-        complete_button  = LessonViewLog.objects.filter(
+        lesson_view_log = LessonViewLog.objects.filter(
             user=request.user,
             course=course,
             lesson=lesson
-        ).exists()
+        ).order_by('-last_activity').first()
         notes = self.get_notes(lesson)
 
         LessonViewLog.objects.create(
             user=self.request.user,
             course=course,
-            lesson=lesson
+            lesson=lesson,
+            is_completed = getattr(lesson_view_log, 'is_completed', False)
         )
 
         return render(request, self.template_name, {
@@ -347,7 +349,7 @@ class FlipPage(View, NotesMixin):
             'order': next_order,
             'first': next_order == 1,
             'last': next_order == last,
-            'completed': complete_button
+            'is_completed': getattr(lesson_view_log, 'is_completed', False)
         })
 
 
@@ -362,6 +364,13 @@ class LessonDone(View):
             user = request.user,
             course = course,
             precent_of_complete = precent_of_complete
+        )
+        lesson = get_object_or_404(Lesson, pk=kwargs['lesson_pk'])
+        LessonViewLog.objects.create(
+            user=self.request.user,
+            course=course,
+            lesson=lesson,
+            is_completed = True
         )
         print(request.POST.get('path'))
         return redirect(request.POST.get('path'))

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block nav %}
-    {% if complete %}
+    {% if not is_completed %}
         <div class="text-center mt-3">
             <form method="post" action="{% url 'lesson_done' course_pk lesson.id %}">
                 {% csrf_token %}
