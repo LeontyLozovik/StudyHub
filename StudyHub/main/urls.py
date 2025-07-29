@@ -30,5 +30,6 @@ urlpatterns = [
     path('lesson/<int:pk>/add_to_course/', add_to_course, name='add_lesson_to_course'),
     path('course/<int:pk>/start', StartCourse.as_view(), name='start_course'),
     path('course/<int:pk>/flip/', FlipPage.as_view(), name = 'flip'),
-    path('course/<int:course_pk>/lesson/<int:lesson_pk>/done/', LessonDone.as_view(), name='lesson_done')
+    path('course/<int:course_pk>/lesson/<int:lesson_pk>/done/', LessonDone.as_view(), name='lesson_done'),
+    path('my_courses/', MyCourses.as_view(), name='my_courses')
 ]

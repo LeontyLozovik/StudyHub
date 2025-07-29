@@ -305,6 +305,9 @@ class StartCourse(View, NotesMixin):
         lesson = course_lesson.lesson
         notes = self.get_notes(lesson)
 
+        user = request.user
+        user.started.add(course)
+
         return render(request, self.template_name, {
             'lesson': lesson,
             'notes': notes,
@@ -375,3 +378,11 @@ class LessonDone(View):
         print(request.POST.get('path'))
         return redirect(request.POST.get('path'))
 
+
+class MyCourses(ListView):
+    model = Course
+    template_name = 'main/my_courses.html'
+    context_object_name = 'my_courses'
+
+    def get_queryset(self):
+        return self.request.user.started.all()

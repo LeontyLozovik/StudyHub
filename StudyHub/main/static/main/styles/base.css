@@ -16,6 +16,11 @@ font-weight: 600;
 font-size: 1.25rem;
 }
 
+.nav-link.active {
+    font-weight: bold;
+    color: #ff6600; /* оранжевый для выделения */
+}
+
 .container {
 max-width: 960px;
 }

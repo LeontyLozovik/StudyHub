@@ -7,10 +7,10 @@
 
 {% block content %}
 <div class="container">
-<h2 class="mb-4">Favorite courses</h2>
+<h2 class="mb-4">Started courses</h2>
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-            {% for course in favorites %}
+            {% for course in my_courses %}
             <div class="col">
                 <a href="{% url 'one_course' course.pk %}" class="text-decoration-none text-dark">
                     <div class="card course-card h-100 position-relative">
@@ -34,7 +34,7 @@
               </a>
             </div>
             {% empty %}
-              <h3 class="w-100">No favorite courses</h3>
+              <h3 class="w-100">No started courses</h3>
             {% endfor %}
         </div>
 </div>

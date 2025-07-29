@@ -45,7 +45,8 @@ class UserProfile(AbstractUser):
     )
     bio = models.TextField(blank=True, null=True)
     country = CountryField(blank_label='Choose your country', default='BY')
-    favorites = models.ManyToManyField('Course', related_name='favorited_by', blank=True)
+    favorites = models.ManyToManyField(to='Course', related_name='favorited_by', blank=True)
+    started = models.ManyToManyField(to='Course', related_name='started_by', blank=True)
 
     class Meta:
         db_table = 'user_profile'
