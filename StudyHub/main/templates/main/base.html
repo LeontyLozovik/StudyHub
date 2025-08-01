@@ -25,9 +25,6 @@
 
             <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link {% if request.path == '/lessons/' %}active{% endif %}" href="{% url 'lessons' %}">Lessons</a></li>
-                </ul>
-                <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link text-decoration-none {% if request.path == '/favorites/' %}active{% endif %}" href="{% url 'favorites' %}">Favorites</a></li>
                 </ul>
                 <ul class="navbar-nav">

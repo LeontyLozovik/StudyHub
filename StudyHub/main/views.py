@@ -11,7 +11,7 @@ from django.template.context_processors import request
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, FormView, DeleteView
-from .mixins import NotesMixin
+from .mixins import NotesMixin, FlipLessonMixin, FinishMixin
 
 from .forms import CreateCourseForm, LoginForm, SignupForm, CreateLessonForm, FeedbackForm
 from .models import Course, UserProfile, Lesson, Review, Note, CourseLesson, Progress, LessonViewLog
@@ -71,12 +71,21 @@ class OneCourse(DetailView):
     template_name = 'main/one_course.html'
     context_object_name = 'course'
 
+    def dispatch(self, request, *args, **kwargs):
+        course = self.get_object()
+        if course in request.user.started.all():
+            order = LessonViewLog.objects.filter(user=request.user, course=course, is_completed=True).distinct().count()
+            return redirect(reverse_lazy('flip', kwargs={'pk': course.pk}) + f'?flip=next&order={order}')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        class_lesson = CourseLesson.objects.filter(course=self.get_object()).order_by('order')
+        course = self.get_object()
+        class_lesson = CourseLesson.objects.filter(course=course).order_by('order')
+        is_finished = course in self.request.user.finished.all()
         context['ordered_lesson'] = [cl.lesson for cl in class_lesson]
+        context['is_finished'] = is_finished
         return context
-
 
 
 class CreateLesson(CreateView):
@@ -93,8 +102,14 @@ class CreateLesson(CreateView):
 class Lessons(ListView):
     model = Lesson
     template_name = 'main/lessons.html'
-    context_object_name = 'lessons'
+    context_object_name = 'ordered_lessons'
     paginate_by = 8
+
+    def get_queryset(self):
+        course = get_object_or_404(Course, pk = self.kwargs['course_pk'])
+        course_lessons = CourseLesson.objects.filter(course=course).order_by('order')
+        ordered_lessons = [cl.lesson for cl in course_lessons]
+        return ordered_lessons
 
 
 class OneLesson(DetailView, NotesMixin):
@@ -221,7 +236,7 @@ def fav_status_change(request, pk):
 
     return redirect('main_page')
 
-class Feedback(FormView):
+class Feedback(FormView, FinishMixin):
     model = Review
     form_class = FeedbackForm
     template_name = 'main/feedback.html'
@@ -229,7 +244,9 @@ class Feedback(FormView):
 
     def form_valid(self, form):
         action = self.request.POST.get('action')
+        course_pk = self.kwargs['pk']
         if action == 'skip':
+            self.finish(course_pk)
             return redirect('main_page')
 
         rate = form.cleaned_data.get('rate')
@@ -243,6 +260,7 @@ class Feedback(FormView):
             rate = rate,
             comment = form.cleaned_data.get('comment', '')
         )
+        self.finish(course_pk)
         return redirect('main_page')
 
 
@@ -316,7 +334,7 @@ class StartCourse(View, NotesMixin):
             'first': True
         })
 
-class FlipPage(View, NotesMixin):
+class FlipPage(View, NotesMixin, FlipLessonMixin):
     template_name = 'main/lesson_course.html'
 
     def get(self, request, pk):
@@ -324,12 +342,7 @@ class FlipPage(View, NotesMixin):
         order = request.GET.get('order')
         course = get_object_or_404(Course, pk=pk)
         last = CourseLesson.objects.filter(course=course).count()
-        if direction == 'next':
-            next_order = int(order) + 1
-            course_lesson = get_object_or_404(CourseLesson, course=course, order=next_order)
-        else:
-            next_order = int(order) - 1
-            course_lesson = get_object_or_404(CourseLesson, course=course, order=next_order)
+        course_lesson, next_order = self.flip(course, direction, order)
         lesson = course_lesson.lesson
         lesson_view_log = LessonViewLog.objects.filter(
             user=request.user,

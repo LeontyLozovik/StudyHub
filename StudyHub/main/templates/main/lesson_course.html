@@ -16,7 +16,7 @@
             <a href="{% url 'flip' course_pk %}?flip=next&order={{ order }}" class="btn btn-primary text-decoration-none">Next</a>
         {% elif last %}
             <a href="{% url 'flip' course_pk %}?flip=prev&order={{ order }}" class="btn btn-secondary text-decoration-none">Previous</a>
-            <a href="{% url 'finish' %}" class="btn btn-success px-4 text-decoration-none">Finish Course</a>
+            <a href="{% url 'finish' course_pk %}" class="btn btn-success px-4 text-decoration-none">Finish Course</a>
         {% else %}
             <a href="{% url 'flip' course_pk %}?flip=prev&order={{ order }}" class="btn btn-secondary text-decoration-none">Previous</a>
             <a href="{% url 'flip' course_pk %}?flip=next&order={{ order }}" class="btn btn-primary text-decoration-none">Next</a>

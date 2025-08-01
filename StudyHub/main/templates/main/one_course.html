@@ -35,20 +35,26 @@
         <p>{{ course.description }}</p>
     </div>
 
-    <div class="mb-5">
-        <h4>Lessons:</h4>
-        <ol class="ps-3 text-muted">
-            {% for lesson in ordered_lesson %}
-                <li>{{ lesson.lesson_name }}</li>
-            {% empty %}
-                <p>No lessons</p>
-            {% endfor %}
-        </ol>
-    </div>
+    {% if is_finished %}
+        <div class="text-center mt-3">
+            <a href="{% url 'lessons' course.pk %}" class="btn btn-success text-decoration-none">All lessons</a>
+        </div>
+    {% else %}
+        <div class="mb-5">
+            <h4>Lessons:</h4>
+            <ol class="ps-3 text-muted">
+                {% for lesson in ordered_lesson %}
+                    <li>{{ lesson.lesson_name }}</li>
+                {% empty %}
+                    <p>No lessons</p>
+                {% endfor %}
+            </ol>
+        </div>
 
-    <div class="text-center mt-3">
-        <a href="{% url 'start_course' course.pk %}" class="btn btn-success text-decoration-none">Start course</a>
-    </div>
+        <div class="text-center mt-3">
+            <a href="{% url 'start_course' course.pk %}" class="btn btn-success text-decoration-none">Start course</a>
+        </div>
+    {% endif %}
 
     <div class="text-end text-muted">
         Author: {{ course.author.username }}<br>
