@@ -1,8 +1,8 @@
-from django.db.models import Max
+from django.db.models import Max, Avg
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
-from .models import CourseLesson, Course
+from .models import CourseLesson, Course, Review
 
 
 class NotesMixin:
@@ -15,6 +15,14 @@ class NotesMixin:
             return lesson.notes_to_lesson.filter(user=self.request.user, availability='private')
         else:
             return lesson.notes_to_lesson.filter(availability='public')
+
+class ReviewMixin:
+    def get_review(self, course):
+        return Review.objects.filter(course=course)
+
+    def get_average_rate(self, course):
+        avg = Review.objects.filter(course=course).aggregate(avg_rate=Avg('rate'))['avg_rate']
+        return round(float(avg), 1) if avg is not None else 0.0
 
 class FlipLessonMixin:
     def flip(self, course, direction, order):

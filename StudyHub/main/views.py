@@ -4,6 +4,7 @@ from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.core.paginator import Paginator
 from django.db import models
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, get_object_or_404, render
@@ -11,7 +12,7 @@ from django.template.context_processors import request
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, FormView, DeleteView
-from .mixins import NotesMixin, FlipLessonMixin, FinishMixin
+from .mixins import NotesMixin, FlipLessonMixin, FinishMixin, ReviewMixin
 
 from .forms import CreateCourseForm, LoginForm, SignupForm, CreateLessonForm, FeedbackForm
 from .models import Course, UserProfile, Lesson, Review, Note, CourseLesson, Progress, LessonViewLog
@@ -40,7 +41,7 @@ class Logout(View):
 
 
 
-class MainPage(ListView):
+class MainPage(ReviewMixin, ListView):
     model = Course
     template_name = 'main/main_page.html'
     context_object_name = 'courses'
@@ -50,7 +51,8 @@ class MainPage(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user_obj = self.request.user
-        context['favorites'] = user_obj.favorites.all()
+        if user_obj.is_authenticated:
+            context['favorites'] = user_obj.favorites.all()
         return context
 
 
@@ -58,33 +60,47 @@ class CreateCourse(LoginRequiredMixin, CreateView):
     model = Course
     form_class = CreateCourseForm
     template_name = 'main/course_form.html'
-    success_url = reverse_lazy('main_page')
 
     def form_valid(self, form):
         form.instance.author = self.request.user
         form.instance.status = 'draft'
         return super().form_valid(form)
 
+    def get_success_url(self):
+        return reverse_lazy('profile', kwargs={'pk': self.request.user.pk})
 
-class OneCourse(DetailView):
+
+class OneCourse(ReviewMixin, DetailView):
     model = Course
     template_name = 'main/one_course.html'
     context_object_name = 'course'
 
     def dispatch(self, request, *args, **kwargs):
         course = self.get_object()
-        if course in request.user.started.all():
-            order = LessonViewLog.objects.filter(user=request.user, course=course, is_completed=True).distinct().count()
-            return redirect(reverse_lazy('flip', kwargs={'pk': course.pk}) + f'?flip=next&order={order}')
+        if request.user.is_authenticated:
+            if course in request.user.started.all():
+                order = LessonViewLog.objects.filter(user=request.user, course=course, is_completed=True).distinct().count()
+                return redirect(reverse_lazy('flip', kwargs={'pk': course.pk}) + f'?flip=next&order={order}')
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         course = self.get_object()
         class_lesson = CourseLesson.objects.filter(course=course).order_by('order')
-        is_finished = course in self.request.user.finished.all()
+        if self.request.user.is_authenticated:
+            is_finished = course in self.request.user.finished.all()
+            context['is_finished'] = is_finished
         context['ordered_lesson'] = [cl.lesson for cl in class_lesson]
-        context['is_finished'] = is_finished
+        context['avg_rate'] = self.get_average_rate(course)
+
+        reviews = self.get_review(course)
+        context['reviews'] = reviews
+        paginator = Paginator(reviews, 5)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['page_obj'] = page_obj
+        context['reviews'] = page_obj.object_list
+
         return context
 
 
@@ -92,11 +108,13 @@ class CreateLesson(CreateView):
     model = Lesson
     form_class = CreateLessonForm
     template_name = 'main/create_lesson.html'
-    success_url = reverse_lazy('main_page')
 
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('profile', kwargs={'pk': self.request.user.pk})
 
 
 class Lessons(ListView):
@@ -106,10 +124,16 @@ class Lessons(ListView):
     paginate_by = 8
 
     def get_queryset(self):
-        course = get_object_or_404(Course, pk = self.kwargs['course_pk'])
-        course_lessons = CourseLesson.objects.filter(course=course).order_by('order')
+        self.course = get_object_or_404(Course, pk = self.kwargs['course_pk'])
+        course_lessons = CourseLesson.objects.filter(course=self.course).order_by('order')
         ordered_lessons = [cl.lesson for cl in course_lessons]
         return ordered_lessons
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course'] = self.course
+        return context
+
 
 
 class OneLesson(DetailView, NotesMixin):
@@ -120,9 +144,14 @@ class OneLesson(DetailView, NotesMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         lesson = self.get_object()
-        context['notes'] = self.get_notes(lesson)
-        return context
+        notes = self.get_notes(lesson)
+        paginator = Paginator(notes, 5)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
+        context['page_obj'] = page_obj
+        context['notes'] = page_obj.object_list
+        return context
 
 
 class Profile(DetailView):
@@ -144,15 +173,15 @@ class UpdateCourse(UpdateView):
     template_name = 'main/update_course.html'
 
     def get_success_url(self):
-        return reverse_lazy('one_course', kwargs={'pk', self.object.pk})
+        return reverse_lazy('one_course', kwargs={'pk': self.object.pk})
 
 
-class DeleteCourse(DetailView):
+class DeleteCourse(DeleteView):
     model = Course
     template_name = 'main/course_confirm_delete.html'
 
     def get_success_url(self):
-        return reverse_lazy('one_course', kwargs={'pk', self.object.pk})
+        return reverse_lazy('profile', kwargs={'pk': self.request.user.pk})
 
 
 class UpdateLesson(UpdateView):
@@ -161,25 +190,26 @@ class UpdateLesson(UpdateView):
     template_name = 'main/update_lesson.html'
 
     def get_success_url(self):
-        return reverse_lazy('one_lesson', kwargs={'pk', self.object.pk})
+        return reverse_lazy('one_lesson', kwargs={'pk': self.object.pk})
 
 
-class DeleteLesson(DetailView):
+class DeleteLesson(DeleteView):
     model = Lesson
     template_name = 'main/lesson_confirm_delete.html'
 
     def get_success_url(self):
-        return reverse_lazy('one_lesson', kwargs={'pk', self.object.pk})
+        return reverse_lazy('profile', kwargs={'pk': self.request.user.pk})
 
 
-def change_status(request, pk):
-    course = get_object_or_404(Course, pk=pk)
-    if course.status == 'draft':
-        course.status = 'published'
-    else:
-        course.status = 'draft'
-    course.save()
-    return redirect('profile', pk=request.user.pk)
+class ChangeStatus(View):
+    def get(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+        if course.status == 'draft':
+            course.status = 'published'
+        else:
+            course.status = 'draft'
+        course.save()
+        return redirect('profile', pk=request.user.pk)
 
 
 class ChangePassword(FormView):
@@ -215,26 +245,30 @@ class Search(ListView):
         context['query'] = self.request.GET.get('q', '')
         return context
 
-class Favorites(ListView):
+class Favorites(LoginRequiredMixin, ListView):
     model = Course
     template_name = 'main/favorites.html'
     context_object_name = 'favorites'
+    login_url = reverse_lazy('login')
 
     def get_queryset(self):
         user_obj = get_object_or_404(UserProfile, pk=self.request.user.pk)
         return user_obj.favorites.all()
 
+class FavStatusChange(LoginRequiredMixin, View):
+    login_url = reverse_lazy('login')
 
-def fav_status_change(request, pk):
-    course = get_object_or_404(Course, pk=pk)
-    user_obj = request.user
+    def get(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+        user_obj = request.user
 
-    if course in user_obj.favorites.all():
-        user_obj.favorites.remove(course)
-    else:
-        user_obj.favorites.add(course)
+        if course in user_obj.favorites.all():
+            user_obj.favorites.remove(course)
+        else:
+            user_obj.favorites.add(course)
 
-    return redirect('main_page')
+        return redirect('main_page')
+
 
 class Feedback(FormView, FinishMixin):
     model = Review
@@ -264,35 +298,37 @@ class Feedback(FormView, FinishMixin):
         return redirect('main_page')
 
 
-def create_note(request, pk):
-    def get_availability():
+class CreateNote(View):
+    def get_availability(self, request):
         if request.POST.get('is_private') == 'on':
             return 'private'
         return 'public'
 
-    Note.objects.create(
-        lesson = Lesson.objects.get(pk=pk),
-        user = request.user,
-        content = request.POST.get('note'),
-        availability = get_availability()
-    )
+    def post(self, request, pk):
+        Note.objects.create(
+            lesson=Lesson.objects.get(pk=pk),
+            user=request.user,
+            content=request.POST.get('note'),
+            availability=self.get_availability(request)
+        )
 
-    return redirect('one_lesson', pk)
+        return redirect('one_lesson', pk)
 
 
-def update_note(request, pk):
-    note = get_object_or_404(Note, pk=pk)
+class UpdateNote(View):
+    def post(self, request, pk):
+        note = get_object_or_404(Note, pk=pk)
 
-    if request.user != note.user:
-        return HttpResponseForbidden()
+        if request.user != note.user:
+            return HttpResponseForbidden()
 
-    if request.method == 'POST':
-        content = request.POST.get('content', '').strip()
-        if content:
-            note.content = content
-            note.save()
+        if request.method == 'POST':
+            content = request.POST.get('content', '').strip()
+            if content:
+                note.content = content
+                note.save()
 
-    return redirect('one_lesson', pk=note.lesson.pk)
+        return redirect('one_lesson', pk=note.lesson.pk)
 
 
 class DeleteNote(DeleteView):
@@ -302,20 +338,33 @@ class DeleteNote(DeleteView):
         return reverse_lazy('one_lesson', kwargs={'pk': self.object.lesson.pk})
 
 
-def add_to_course(request, pk):
-    course_id = request.POST.get('course_id')
-    course = get_object_or_404(Course, pk=course_id)
-    lesson = get_object_or_404(Lesson, pk=pk)
+class AddToCourse(View):
+    def post(self, request, pk):
+        course_id = request.POST.get('course_id')
+        course = get_object_or_404(Course, pk=course_id)
+        lesson = get_object_or_404(Lesson, pk=pk)
+        if lesson in course.lessons.all():
+             return redirect('profile', pk=request.user.pk)
 
-    last_order = (CourseLesson.objects.filter(course=course).aggregate(max_order=models.Max('order'))['max_order']) or 0
+        last_order = (CourseLesson.objects.filter(course=course).aggregate(max_order=models.Max('order'))['max_order']) or 0
 
-    CourseLesson.objects.create(course=course, lesson=lesson, order=last_order + 1)
+        CourseLesson.objects.create(course=course, lesson=lesson, order=last_order + 1)
 
-    return redirect('profile', pk=request.user.pk)
+        return redirect('profile', pk=request.user.pk)
 
 
-class StartCourse(View, NotesMixin):
+class RemoveFromCourse(View):
+    def get(self, request, course_pk, lesson_pk):
+        lessons_count = CourseLesson.objects.filter(course__pk=course_pk).count()
+        if lessons_count > 1:
+            course_lesson = CourseLesson.objects.get(course__pk=course_pk, lesson__pk=lesson_pk)
+            course_lesson.delete()
+        return redirect('lessons', course_pk=course_pk)
+
+
+class StartCourse(LoginRequiredMixin, NotesMixin, View):
     template_name = 'main/lesson_course.html'
+    login_url = reverse_lazy('login')
 
     def get(self, request, pk):
         course = get_object_or_404(Course, pk=pk)
@@ -392,10 +441,13 @@ class LessonDone(View):
         return redirect(request.POST.get('path'))
 
 
-class MyCourses(ListView):
+class MyCourses(LoginRequiredMixin, ListView):
     model = Course
     template_name = 'main/my_courses.html'
     context_object_name = 'my_courses'
+    login_url = reverse_lazy('login')
 
     def get_queryset(self):
-        return self.request.user.started.all()
+        started = self.request.user.started.all()
+        finished = self.request.user.finished.all()
+        return started.union(finished)

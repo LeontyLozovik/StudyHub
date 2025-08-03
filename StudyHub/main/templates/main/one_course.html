@@ -3,6 +3,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'main/styles/one_course.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="..." crossorigin="anonymous">
 {% endblock %}
 
 {% block content %}
@@ -10,9 +11,9 @@
 
     <div class="text-center mb-5 position-relative">
         {% if user.username == course.author.username %}
-            <div class="position-absolute top-0 end-0">
-                <a href="{% url 'update_course' course.pk %}" class="btn btn-primary btn-sm me-2 text-decoration-none">Update</a>
-                <a href="{% url 'delete_course' course.pk %}" class="btn btn-danger btn-sm text-decoration-none">Delete</a>
+            <div class="position-absolute top-0 end-0 d-flex gap-2">
+                <a href="{% url 'update_course' course.pk %}" class="btn btn-primary btn-sm w-50 text-decoration-none">Edit</a>
+                <a href="{% url 'delete_course' course.pk %}" class="btn btn-danger btn-sm w-50 text-decoration-none">Delete</a>
             </div>
         {% endif %}
 
@@ -56,9 +57,21 @@
         </div>
     {% endif %}
 
-    <div class="text-end text-muted">
-        Author: {{ course.author.username }}<br>
-        Published: {{ course.date_of_publication }}
+    <div class="d-flex justify-content-end align-items-center gap-2 mb-3">
+        <div class="text-warning fs-5">
+            <i class="fa-solid fa-star me-1"></i>
+            <small>{{ avg_rate }}</small>
+        </div>
+
+        <div class="text-end text-muted ms-4">
+            Author: {{ course.author.username }}<br>
+            Published: {{ course.date_of_publication }}
+        </div>
+    </div>
+
+
+    <div class="lesson-container mx-auto mt-4">
+        {% include 'main/_review_block.html' %}
     </div>
 
 </div>

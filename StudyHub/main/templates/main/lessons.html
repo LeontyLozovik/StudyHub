@@ -7,22 +7,30 @@
 
 {% block content %}
 <div class="container">
-    <h2 class="text-center mb-4">Уроки курса: {{ course.course_name }}</h2>
+    <h2 class="text-center mb-4">{{ course.course_name }} course lessons</h2>
 
     {% if ordered_lessons %}
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
-            {% for lesson in ordered_lessons %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ lesson.lesson_name|truncatechars:50 }}</h5>
-                            <p class="card-text small text-muted">{{ lesson.description|truncatechars:80 }}</p>
-                            <a href="{% url 'one_lesson' lesson.pk %}" class="mt-auto btn btn-outline-primary text-decoration-none">Смотреть</a>
-                        </div>
+    {% for lesson in ordered_lessons %}
+        <div class="col">
+            <div class="card h-100 shadow-sm position-relative">
+
+                <a href="{% url 'remove_lesson_from_course' course.pk lesson.pk %}"
+                   class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 text-decoration-none  ">
+                    Remove
+                </a>
+
+                <a href="{% url 'one_lesson' lesson.pk %}" class="mt-auto text-decoration-none">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ lesson.lesson_name|truncatechars:50 }}</h5>
+                        <p class="card-text small text-muted">{{ lesson.description|truncatechars:80 }}</p>
                     </div>
-                </div>
-            {% endfor %}
+                </a>
+            </div>
         </div>
+    {% endfor %}
+</div>
+
     {% else %}
         <p class="text-center">This course hasn't got any lessons</p>
     {% endif %}

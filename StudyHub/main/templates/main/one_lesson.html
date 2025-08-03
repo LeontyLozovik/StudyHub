@@ -13,9 +13,9 @@
         <div class="text-center position-relative mb-4">
             <h2 class="lesson-title">{{ lesson.lesson_name }}</h2>
             {% if user == lesson.author %}
-                <div class="position-absolute top-0 end-0">
-                    <a href="{% url 'update_lesson' lesson.pk %}" class="btn btn-primary btn-sm me-2 text-decoration-none">Update</a>
-                    <a href="{% url 'delete_lesson' lesson.pk %}" class="btn btn-danger btn-sm text-decoration-none">Delete</a>
+                <div class="position-absolute top-0 end-0 d-flex gap-2">
+                    <a href="{% url 'update_lesson' lesson.pk %}" class="btn btn-primary btn-sm w-50 text-decoration-none">Edit</a>
+                    <a href="{% url 'delete_lesson' lesson.pk %}" class="btn btn-danger btn-sm w-50 text-decoration-none">Delete</a>
                 </div>
             {% endif %}
         </div>
@@ -44,69 +44,7 @@
 {% endblock %}
 
 <div class="lesson-container mx-auto mt-4">
-    <form method="post" action="{% url 'create_note' lesson.pk %}">
-        {% csrf_token %}
-
-        <div class="mb-3">
-            <label for="note" class="form-label">Note to lesson:</label>
-            <textarea id="note" name="note" class="form-control" rows="4" placeholder="Enter you note..."></textarea>
-        </div>
-
-        <div class="form-check mb-3">
-            <input type="checkbox" class="form-check-input" id="is_private" name="is_private">
-            <label class="form-check-label" for="is_private">Make private</label>
-        </div>
-
-        <button type="submit" class="btn btn-success">Create</button>
-    </form>
-    <div class="d-flex justify-content-start gap-3 mt-3 ps-2">
-        <a href="?filter=all"
-           class="note-filter-link {% if request.GET.filter == 'all' or not request.GET.filter %}active{% endif %} text-decoration-none">All</a>
-        <a href="?filter=my"
-           class="note-filter-link {% if request.GET.filter == 'my' %}active{% endif %} text-decoration-none">Only My</a>
-        <a href="?filter=private"
-           class="note-filter-link {% if request.GET.filter == 'private' %}active{% endif %} text-decoration-none">Only Private</a>
-    </div>
-
-    {% if notes %}
-        <hr>
-        <div class="mt-3">
-            {% for note in notes %}
-                <div class="border rounded p-3 mb-2 position-relative note-block">
-                    {% if note.user == request.user %}
-                        <div class="position-absolute top-0 end-0 m-2 d-flex gap-2 edit-controls">
-                            <button type="button" class="btn btn-sm bg-secondary text-white edit-btn">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-
-                            <form method="post" action="{% url 'delete_note' note.pk %}" style="margin: 0;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm bg-danger text-white" style="padding: 0.25rem 0.5rem;">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    {% endif %}
-
-                    <p class="mb-1 note-content">{{ note.content }}</p>
-
-                    <form method="post" action="{% url 'update_note' note.pk %}" class="edit-form d-none">
-                        {% csrf_token %}
-                        <textarea name="content" class="form-control mb-2">{{ note.content }}</textarea>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success btn-sm">Save</button>
-                            <button type="button" class="btn btn-secondary btn-sm cancel-btn">Cancel</button>
-                        </div>
-                    </form>
-
-                    <small class="text-muted">
-                        {{ note.user }} — {{ note.created_at|date:"Y-m-d" }}
-                    </small>
-                </div>
-
-            {% endfor %}
-        </div>
-    {% endif %}
+    {% include 'main/_notes_block.html' %}
 </div>
 {% endblock %}
 

@@ -28,10 +28,16 @@
     color: #6c757d;
     text-decoration: none;
 }
+
 .note-filter-link:hover {
     color: #6c757d;
     text-decoration: none;
 }
+
 .note-filter-link.active {
     font-weight: 600;
+}
+
+.page-link {
+    text-decoration: none !important;
 }

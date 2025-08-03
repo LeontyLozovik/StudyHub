@@ -1,0 +1,33 @@
+<div class="col">
+        <a href="{% url 'one_course' course.pk %}" class="text-decoration-none text-dark">
+            <div class="card course-card h-100 position-relative">
+                <img src="{{ course.cover.url }}" class="card-img-top course-cover" alt="{{ course.course_name }}">
+
+                <a href="{% url 'fav_change' course.pk %}" class="text-decoration-none">
+                    <div class="position-absolute top-0 start-0 m-2">
+                        <button
+                            class="favorite-btn border-0 bg-transparent p-0"
+                            data-course-id="{{ course.id }}"
+                            aria-label="Toggle Favorite">
+                            <i class="fa-star favorite-icon {% if course in favorites %}fa-solid text-warning{% else %}fa-regular{% endif %}"></i>
+                        </button>
+                    </div>
+                </a>
+
+                <div class="level-badge badge position-absolute top-0 end-0 m-2 text-white
+                     {% if course.level == 'starter_level' %}bg-primary
+                     {% elif course.level == 'middle_level' %}bg-warning text-dark
+                     {% elif course.level == 'advanced_level' %}bg-danger
+                     {% endif %}">
+                    {{ course.get_level_display }}
+                </div>
+
+                <div class="card-body d-flex flex-column">
+                    <small class="text-muted author-date mb-2">
+                        {{ course.author.username }} &bull; {{ course.date_of_publication|date:"d M Y" }}
+                    </small>
+                    <h5 class="card-title mt-auto">{{ course.course_name }}</h5>
+                </div>
+            </div>
+        </a>
+    </div>
