@@ -12,11 +12,11 @@
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
             {% for course in results %}
-            {% if course.status == 'published' %}
-            {% include 'main/_course_card_block.html' %}
-            {% endif %}
+                {% if course.status == 'published' %}
+                    {% include 'main/blocks/course_card_block.html' %}
+                {% endif %}
             {% empty %}
-            <h3 class="w-100">No courses founded</h3>
+                <h3 class="w-100">No courses founded</h3>
             {% endfor %}
         </div>
 </div>

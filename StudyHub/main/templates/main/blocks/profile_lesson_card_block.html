@@ -1,0 +1,30 @@
+<div class="col-sm-6 col-md-4 col-xl-3">
+    <div class="card h-100 shadow-sm position-relative">
+        <div class="card-body">
+            <a href="{% url 'one_lesson' lesson.pk %}" class="text-decoration-none text-dark">
+                <h6 class="card-title">{{ lesson.lesson_name }}</h6>
+            </a>
+            <div class="d-flex flex-column gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm w-100 add-btn">Add</button>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'update_lesson' lesson.pk %}" class="btn btn-outline-primary btn-sm w-50 text-decoration-none">Edit</a>
+                    <a href="{% url 'delete_lesson' lesson.pk %}" class="btn btn-outline-danger btn-sm w-50 text-decoration-none">Delete</a>
+                </div>
+            </div>
+
+            <div class="course-list mt-3 d-none">
+                <div class="border rounded p-2 bg-light">
+                    {% for course in draft_courses %}
+                        <form method="post" action="{% url 'add_lesson_to_course' lesson.pk %}" class="mb-1">
+                            {% csrf_token %}
+                            <input type="hidden" name="course_id" value="{{ course.id }}">
+                            <button type="submit" class="btn btn-sm btn-outline-dark w-100 text-start">
+                                {{ course.course_name }}
+                            </button>
+                        </form>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

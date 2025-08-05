@@ -14,7 +14,7 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
         {% for course in courses %}
             {% if course.status == 'published' %}
-                {% include 'main/_course_card_block.html' %}
+                {% include 'main/blocks/course_card_block.html' %}
             {% endif %}
             {% empty %}
                 <p>No courses founded</p>
