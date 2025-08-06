@@ -1,5 +1,25 @@
 {% extends 'main/one_lesson.html' %}
 {% load static %}
+{% load tags %}
+
+{% block progress %}
+<div class="mb-3">
+    <label class="form-label">Progress</label>
+    <div class="d-flex align-items-center gap-3">
+        <div class="progress flex-grow-1" style="height: 10px; min-width: 150px;">
+            {% course_progress lesson.author course_pk as percent %}
+            <div class="progress-bar bg-success"
+                 role="progressbar"
+                 style="width: {{ percent }}%;"
+                 aria-valuenow="{{ percent }}"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+            </div>
+        </div>
+        <span class="text-muted">{{ percent }}%</span>
+    </div>
+</div>
+{% endblock %}
 
 {% block nav %}
     {% if not is_completed %}
